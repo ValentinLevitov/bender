@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <xs:complexType name="Notification">
+    <xs:attribute name="subject" use="required" />
+    <xs:attribute name="recommendations" />
+    <xs:attribute name="mailTo" use="required" />
+    <xs:attribute name="cc" />
+  </xs:complexType>
+
+  <xs:complexType name="CallRest">
+      <xs:sequence>
+        <xs:element name="body" />
+      </xs:sequence>
+      <xs:attribute name="verb" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="POST" />
+            <xs:enumeration value="PUT" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="urlPattern" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="JqlRule">
+      <xs:all>
+      <xs:element  name="jql" minOccurs="1" maxOccurs="1" />
+
+        <xs:element name="notify" type="Notification" minOccurs="0" maxOccurs="1" />        
+        <xs:element name="callRest" type="CallRest" minOccurs="0" maxOccurs="1" />  
+    
+    </xs:all>
+
+    <xs:attribute name="group" use="required" />
+    <xs:attribute name="comment" />
+    <xs:attribute name="active" >
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="1" />
+          <xs:enumeration value="0" />
+          <xs:enumeration value="true" />
+          <xs:enumeration value="false" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+</xs:complexType>
+
+  <xs:element name="configuration">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="jqlRule" maxOccurs="unbounded" type="JqlRule" />
+        <xs:element name="redirection_rules" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="rule" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="from" use="required" />
+                  <xs:attribute name="to" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

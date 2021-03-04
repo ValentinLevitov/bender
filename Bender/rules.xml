@@ -1,0 +1,55 @@
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="rules.xsd">
+  
+  <jqlRule 
+    group="daily"
+    active="1">
+    <notify 
+      mailTo="assignee"
+      cc="reporter,managers"
+      subject="DueDate of the issue is expired"
+      recommendations="Please resolve or reschedule the issue"
+      />
+    
+    <jql><![CDATA[ DueDate < startOfDay() AND Resolution is EMPTY ]]></jql>
+  </jqlRule>
+  
+  <jqlRule
+    group="hourly" 
+    active="1">
+    <jql>Project = SUPP AND Type = "Support Request" AND Resolution is EMPTY AND DueDate is EMPTY</jql>
+    <callRest 
+      verb="PUT"
+      urlPattern="{{@jiraRoot}}rest/api/2/issue/{{@issueKey}}">
+
+      <body>
+        <![CDATA[
+        {
+          "update":{
+            "duedate": [ {
+              "set":
+                "<<c#(
+                    System.DateTime.Today +
+                      System.TimeSpan.FromDays(
+                        System.DateTime.Now.Hour < 16 ? 0
+                        : System.DateTime.Today.DayOfWeek == System.DayOfWeek.Friday ? 3
+                        : 1
+                      )
+                    )
+                    .ToString("yyyy-MM-dd")#>>"
+                    } ],
+
+                "comment": [{"add": {"body": "Approximate date of Support Request review"}}]
+            }
+        }
+        ]]>
+      </body>
+
+    </callRest>
+  </jqlRule>
+
+  <redirection_rules>
+    <rule from="managers" to="super_boss@example.com,super_boss2@example.com" />
+  </redirection_rules>
+
+</configuration>

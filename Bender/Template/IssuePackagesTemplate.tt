@@ -1,0 +1,66 @@
+﻿<#@ template language="C#" debug="true" #>
+<#@ output encoding="utf-8" extension=".cs"#>
+<#@ import namespace="Bender.Data.Supplying" #>
+<#@ import namespace="Bender.Data" #>
+<#@ import namespace="Bender.Template" #>
+<# foreach(var package in _packages) { #>
+<h3><#= package.Reaction.Subject #></h3>
+<# if (!string.IsNullOrEmpty(package.Reaction.Recommendations))
+{ #>
+<h4><#= package.Reaction.Recommendations ?? "" #></h4>
+<# } #>
+<# if (package.Properties.ContainsKey("Jql"))
+{ #>
+<br>
+<a href="<#=
+	new JiraRest.UriBuilder()
+		.SetRoot(_rootUri)
+		.AddRelativePath("issues/")
+		.AddParam("jql", package.Properties["Jql"], true)
+		.Build()
+		.ToString()
+		.Replace("\"", "%22")
+    #>">JQL</a>
+<br>
+<# }
+else
+{ #>
+<!– Meta for issues from structure, not implemented yet –>
+<# } #>
+<table width="100%" border="1" cellspacing="0" cellpadding="4">
+	<tr align="center" bgcolor="#999999">
+		<td>Type</td>
+		<td>Key</td>
+		<td>Summary</td>
+		<td>Assignee</td>
+		<td>Reporter</td>
+		<td>Status</td>
+		<td>Priority</td>
+		<td>Components</td>
+		<td>Labels</td>
+		<td>Time Spent (hrs)</td>
+		<td>Build Found</td>
+		<td>Build Fixed</td>
+		<td>Due Date</td>
+		<td>Created</td>
+	</tr>
+<# foreach(var issue in package.Items) { #>
+	<tr>
+		<td><#= issue.Type ?? "" #></td>
+		<td><a href="<#= new JiraRest.UriBuilder().SetRoot(_rootUri).AddRelativePath($"browse/{issue.Key ?? ""}").Build() #>"><#= issue.Key ?? "" #></a></td>
+		<td><#= issue.Summary ?? "" #></td>
+		<td><#= (issue.Staff.Assignee ?? new User { DisplayName = "UNASSIGNED" }).DisplayName ?? "" #></td>
+		<td><#= (issue.Staff.Reporter ?? new User { DisplayName = "UNKNOWN" }).DisplayName ?? "" #></td>
+		<td><#= issue.Status ?? "" #></td>
+		<td><#= issue.Priority ?? "" #></td>
+		<td><#= issue.Components ?? "" #></td>
+		<td><#= issue.Labels ?? "" #></td>
+		<td><#= issue.TimeSpent.TotalHours #></td>
+		<td><#= string.Join(", ", issue.BuildFound) #></td>
+		<td><#= string.Join(", ", issue.BuildFixed) #></td>
+		<td><#= issue.DueDate != null ? issue.DueDate.Value.ToString("dd.MM.yyyy") : "" #></td>
+		<td><#= issue.CreatedDate.ToString("dd.MM.yyyy") #></td>
+	</tr>
+<# } #>
+</table>
+<# } #>

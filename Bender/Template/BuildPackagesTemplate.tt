@@ -1,0 +1,25 @@
+﻿<#@ template language="C#" debug="true" #>
+<#@ output encoding="utf-8" extension=".cs"#>
+<# foreach(var package in Packages) { #>
+<h3><#= package.Reaction.Subject #></h3>
+<# if (!string.IsNullOrEmpty(package.Reaction.Recommendations))
+{ #>
+<h4><#= package.Reaction.Recommendations ?? "" #></h4>
+<# } #>
+<table border="1" cellspacing="0" cellpadding="4">
+	<tr align="center" bgcolor="#999999">
+		<td>Name</td>
+		<td>StartDate</td>
+		<td>ReleaseDate</td>
+		<td>Description</td>
+	</tr>
+<# foreach(var build in package.Items) { #>
+	<tr>
+		<td><#= build.Name ?? "" #></td>
+		<td><#= build.StartDate?.ToString("dd.MM.yyyy") ?? "empty" #></td>
+		<td><font color="red"><b><#= build.ReleaseDate?.ToString("dd.MM.yyyy") #><b></font></td>
+		<td><#= build.Description ?? "" #></td>
+	</tr>
+<# } #>
+</table>
+<# } #>

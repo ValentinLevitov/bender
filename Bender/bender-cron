@@ -1,0 +1,3 @@
+0 10 * * MON-FRI  dotnet /app/DNCore2.Bender.dll daily >> /var/log/cron.log 2>&1
+0 9-20 * * MON-FRI  dotnet /app/DNCore2.Bender.dll hourly >> /var/log/cron.log 2>&1
+# Don't remove the empty line at the end of this file. It is required to run the cron job
