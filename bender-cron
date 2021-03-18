@@ -1,0 +1,2 @@
+0 10 * * MON-FRI  /app/Bender daily
+0 9-20 * * MON-FRI  /app/Bender hourly
