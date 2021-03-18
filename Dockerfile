@@ -18,9 +18,16 @@ RUN curl -fsSLO https://github.com/aptible/supercronic/releases/download/v0.1.12
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:5.0-alpine AS final
 LABEL org.opencontainers.image.source=https://github.com/ValentinLevitov/bender
-COPY --from=get-rootless-cron /tmp/supercronic-linux-amd64 /usr/local/bin/supercronic
-RUN chmod +x /usr/local/bin/supercronic
 WORKDIR /app
-ADD bender-cron .
 COPY --from=publish /app/publish/ .
+RUN ln -s /app/Bender /usr/local/bin/bender
+COPY --from=get-rootless-cron /tmp/supercronic-linux-amd64 /usr/local/bin/supercronic
+RUN chmod +x /usr/local/bin/supercronic /usr/local/bin/bender
+ADD bender-cron .
+RUN adduser \
+  --disabled-password \
+  --home /app \
+  --gecos '' app \
+  && chown -R app /app
+USER app
 CMD supercronic -passthrough-logs /app/bender-cron

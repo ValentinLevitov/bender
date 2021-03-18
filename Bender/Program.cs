@@ -11,7 +11,7 @@ namespace Bender
                 Console.WriteLine(
 @"Bender must always be run with a single parameter 'schedule name', for example: 
 ----
-dotnet Bender.dll daily
+# bender daily
 ----");
                 return;
             }
