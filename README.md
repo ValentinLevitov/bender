@@ -112,19 +112,20 @@ So far so good. Now let's suppose we want to enhance a bit some workflow process
             AND Resolution is Empty
             ]]>
         </jql>
-            <callRest
-              verb="PUT"
-              urlPattern="{{@jiraRoot}}rest/api/2/issue/{{@issueKey}}">
+        <callRest
+            verb="PUT"
+            urlPattern="{{@jiraRoot}}rest/api/2/issue/{{@issueKey}}">
 
-                <body><![CDATA[
-                        {
-                            "update": {
-                                "assignee": [{"set": {"name": null}}],
-                                "comment": [{"add": {"body": "Dropping Assignee. Only members of Support-Administrators team may assign Support issues"}}]
-                            }
+            <body><![CDATA[
+                    {
+                        "update": {
+                            "assignee": [{"set": {"name": null}}],
+                            "comment": [{"add": {"body": "Dropping Assignee. Only members of Support-Administrators team may assign Support issues"}}]
                         }
-                    ]]>
-                </body>
+                    }
+                ]]>
+            </body>
+        </callRest>
      </jqlRule>
 </configuration>
 ```
