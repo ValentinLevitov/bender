@@ -22,7 +22,14 @@ namespace Bender.Data.Convert
 
         public static User? ToUser(dynamic user)
         {
-            return user == null ? null : new User { DisplayName = user.displayName, Email = user.emailAddress };
+            return user == null ? null :
+                new User 
+                {
+                    DisplayName = user.displayName,
+                    Email = user.emailAddress,
+                    Name = user.name,
+                    Key = user.key
+                };
         }
 
         public static Issue ToIssue(dynamic issue)

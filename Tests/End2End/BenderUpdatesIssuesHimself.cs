@@ -17,6 +17,7 @@ using Moq;
 using Moq.Protected;
 using NUnit.Framework;
 using Serilog;
+using System.Xml.Linq;
 
 using static System.String;
 
@@ -37,7 +38,13 @@ namespace End2End.Tests
 			""issuetype"": {
 				
 			},
-			""created"": ""2018-08-14T13:50:59.000+0000""
+			""created"": ""2018-08-14T13:50:59.000+0000"",
+            ""assignee"": {
+                ""name"": ""alice""
+            },
+            ""reporter"": {
+                ""name"": ""bob""
+            }
 		}
 	}]
 }";
@@ -210,5 +217,86 @@ namespace End2End.Tests
 				result.Single().Body                                 // Actual
 				);
 		}
+
+        [Test]
+        public void CheckAssigneeAndReporterReplacement()
+        {
+            // Setup
+            var rule = 
+@"<configuration>
+  <jqlRule group=""test"">
+    <jql>any</jql>
+    <callRest verb=""PUT"" urlPattern=""https://jira.example.com/swap-assignee-and-reporter-where/?assignee={{@assignee.name}}&amp;reporter={{@reporter.name}}"">
+                    <body><![CDATA[
+                        {
+                            ""update"": {
+                                ""assignee"": [{""set"": {""name"": ""{{@reporter.name}}""}}],
+                                ""reporter"": [{""set"": {""name"": ""{{@assignee.name}}""}}]
+                            }
+                        }
+                    ]]>
+                </body>
+    </callRest>
+  </jqlRule>
+</configuration>";
+
+            var rulesConfig = new XmlRulesConfig(XDocument.Parse(rule), new Mock<ILogger>().Object);
+
+            var responseWhenGetIssues = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(JsonTypicalIssue)
+            };
+
+            var responseWhenDoPut = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("")
+            };
+
+            var responseHandler = new Mock<DelegatingHandler>();
+            responseHandler
+                .Protected()
+                .SetupSequence<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .Returns(Task.FromResult(responseWhenGetIssues))
+                .Returns(Task.FromResult(responseWhenDoPut))
+                ;
+
+            var connection = new Connection("http://jira", Empty, Empty)
+            {
+                Client = new HttpClient(responseHandler.Object)
+            };
+
+            var jiraService = new HttpJiraService("http://jira", Empty, Empty)
+            {
+                Connection = connection
+            };
+
+            var packageSupplier = new JqlSupplier(jiraService, rulesConfig.GetJqlRules("test"), new Mock<ILogger>().Object);
+            var pipe = new ReactionPipe<Issue>()
+                {
+                    PackageSupplier = packageSupplier,
+                    PackageConverter = new IssuePackageConverter(Empty),
+                    HttpHandler = jiraService
+                };
+
+            // Experiment
+            pipe.Run();
+
+            // Check results
+            responseHandler
+                .Protected()
+                .Verify<Task<HttpResponseMessage>>("SendAsync",
+                    Times.Once(),
+                    ItExpr.Is<HttpRequestMessage>(
+                        r => 
+                            r.RequestUri == new Uri("https://jira.example.com/swap-assignee-and-reporter-where/?assignee=alice&reporter=bob")
+                                && r.Method == HttpMethod.Put
+                                && r.Content!.ReadAsStringAsync().Result.Contains(@"""assignee"": [{""set"": {""name"": ""bob""}}]")
+                                && r.Content!.ReadAsStringAsync().Result.Contains(@"""reporter"": [{""set"": {""name"": ""alice""}}]")
+                    ),
+                    ItExpr.IsAny<CancellationToken>());
+
+
+        }
 	}
 }
