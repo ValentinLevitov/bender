@@ -155,4 +155,4 @@ $ docker run \
 *TODO: [Serilog](https://github.com/serilog) library is used for the logging, specific configuration should be placed at `Logging` section of the appsettings.json file.*
 
 # Run under Kubernetes, OKD, OpenShift
-*TODO: helm chart*
+Use [helm/bender](https://github.com/ValentinLevitov/helm) to deploy under the popular container orchestrators.
