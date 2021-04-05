@@ -101,15 +101,14 @@ namespace Bender.Data.Supplying
             var actionPackages =
                 (
                     from set in uncategorizedSet
-                    where set.rule.HowToUpdate != null
-                    let rule = set.rule
+                    from updateAction in set.rule.HowToUpdate
                     let package = new Package<BenderMakesUpdateHimself, Issue>
                     {
                         Reaction = new BenderMakesUpdateHimself
                         {
-                            BodyPattern = rule.HowToUpdate!.BodyPattern,
-                            UrlPattern = rule.HowToUpdate.UrlPattern,
-                            Verb = rule.HowToUpdate.Verb
+                            BodyPattern = updateAction.BodyPattern,
+                            UrlPattern = updateAction.UrlPattern,
+                            Verb = updateAction.Verb
                         },
                         Items = set.issues
                     }

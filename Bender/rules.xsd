@@ -24,13 +24,13 @@
   </xs:complexType>
 
   <xs:complexType name="JqlRule">
-      <xs:all>
+      <xs:sequence>
       <xs:element  name="jql" minOccurs="1" maxOccurs="1" />
 
         <xs:element name="notify" type="Notification" minOccurs="0" maxOccurs="1" />        
-        <xs:element name="callRest" type="CallRest" minOccurs="0" maxOccurs="1" />  
+        <xs:element name="callRest" type="CallRest" minOccurs="0" maxOccurs="unbounded" />  
     
-    </xs:all>
+    </xs:sequence>
 
     <xs:attribute name="group" use="required" />
     <xs:attribute name="comment" />

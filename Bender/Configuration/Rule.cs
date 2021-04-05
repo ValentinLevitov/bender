@@ -1,4 +1,5 @@
-﻿using Bender.Configuration.Action;
+﻿using System.Linq;
+using Bender.Configuration.Action;
 
 namespace Bender.Configuration
 {
@@ -6,6 +7,6 @@ namespace Bender.Configuration
     {
         public string? AdditionalPredicateName { get; set; }
         public Notify? HowToNotify { get; set; }
-        public Update? HowToUpdate { get; set; }
+        public Update[] HowToUpdate { get; set; } = new Update[] {};
    }
 }

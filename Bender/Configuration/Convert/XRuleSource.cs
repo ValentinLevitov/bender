@@ -62,16 +62,16 @@ namespace Bender.Configuration.Convert
                 };
             }
 
-            var callRest = src.Element("callRest");
-            if (callRest != null)
-            {
-                rule.HowToUpdate = new Update
+            rule.HowToUpdate = 
+            (
+                from callRest in src.Elements("callRest")
+                select new Update
                 {
                     Verb = (string) callRest.Attribute("verb")!,
                     UrlPattern = (string)callRest.Attribute("urlPattern")!,
                     BodyPattern = (string?) callRest.Element("body")
-                };
-            }
+                }
+            ).ToArray();
 
             return rule;
         }

@@ -86,10 +86,13 @@ namespace End2End.Tests
             var jqlRule = new JqlRule
             {
                 Jql = "any",
-                HowToUpdate = new Update
+                HowToUpdate = new[] 
                 {
-                    UrlPattern = "{{@jiraRoot}}/rest/api/2/issue/{{@issueKey}}/transitions",
-                    BodyPattern = @"{
+                    new Update
+                    {
+                        Verb = "POST",
+                        UrlPattern = "{{@jiraRoot}}/rest/api/2/issue/{{@issueKey}}/transitions",
+                        BodyPattern = @"{
     ""update"": 
 	{
         ""comment"": [
@@ -104,8 +107,8 @@ namespace End2End.Tests
     ""transition"": {
         ""id"": ""61""
     }
-}",
-                    Verb = "POST"
+}"
+                    }
                 }
             };
 
@@ -295,8 +298,86 @@ namespace End2End.Tests
                                 && r.Content!.ReadAsStringAsync().Result.Contains(@"""reporter"": [{""set"": {""name"": ""alice""}}]")
                     ),
                     ItExpr.IsAny<CancellationToken>());
+        }
 
+       [Test]
+        public void CheckSeveralExpressionsToEvaluateInOneBody()
+        {
+            // Setup
+            var converter = new IssuePackageConverter("https://jira.example.com");
 
+            var package = new Package<BenderMakesUpdateHimself, Issue>
+            {
+                // JQL: issueFunction in issueFieldMatch('', labels, 'linkTo=')
+                Items = new[] 
+                {
+                    new Issue 
+                    {
+                        Key = "BUG-2",
+                        Labels = "linkTo=TASK-1",
+                    }
+                },
+                
+                Reaction = new BenderMakesUpdateHimself
+                {
+                    UrlPattern = "{{@jiraRoot}}/rest/api/2/issue/{{@issueKey}}",
+                    BodyPattern = @"
+{
+    ""update"": {
+        ""issueLinks"": [
+            {
+                ""add"": {
+                    ""type"": {
+                        ""name"": ""Relate""
+                    },
+                    ""outwardIssue"": {
+                        ""key"": ""<<c# System.Text.RegularExpressions.Regex.Match(issue.Labels, ""linkTo=(.+-\\d+)"").Groups[1].Value #>>""
+                    }
+                }
+            }
+        ],
+        ""labels"": [
+            {
+                ""remove"": ""<<c# System.Text.RegularExpressions.Regex.Match(issue.Labels, ""linkTo=.+-\\d+"").Value #>>""
+            }
+        ]
+    }
+}
+"
+                }
+            };
+
+            // Experiment
+            var actualRequest = converter.ToHttpRequests(new[] {package}).Single();
+
+            // Check results
+            var expectedUrl = "https://jira.example.com/rest/api/2/issue/BUG-2";
+            var expectedBody = @"
+{
+    ""update"": {
+        ""issueLinks"": [
+            {
+                ""add"": {
+                    ""type"": {
+                        ""name"": ""Relate""
+                    },
+                    ""outwardIssue"": {
+                        ""key"": ""TASK-1""
+                    }
+                }
+            }
+        ],
+        ""labels"": [
+            {
+                ""remove"": ""linkTo=TASK-1""
+            }
+        ]
+    }
+}
+";
+
+            Assert.AreEqual(expectedUrl, actualRequest.Uri.ToString());
+            Assert.AreEqual(expectedBody, actualRequest.Body);
         }
 	}
 }

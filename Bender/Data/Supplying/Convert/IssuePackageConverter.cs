@@ -28,16 +28,16 @@ namespace Bender.Data.Supplying.Convert
                 select new HttpRequest
                 {
                     Verb = package.Reaction.Verb,
-                    Body = ReplaceKnownMarkers(package.Reaction.BodyPattern, issue),
-                    Uri = new Uri(ReplaceKnownMarkers(package.Reaction.UrlPattern, issue))
+                    Body = ReplaceKnownMarkers(package.Reaction.BodyPattern, issue) ?? string.Empty,
+                    Uri = new Uri(ReplaceKnownMarkers(package.Reaction.UrlPattern, issue) ?? string.Empty)
                 }
             ).ToArray();
         }
 
-        private string ReplaceKnownMarkers(string? template, Issue issue)
+        private string? ReplaceKnownMarkers(string? template, Issue issue)
         {
-            return 
-            (template ?? string.Empty)
+            return template == null ? null
+            : template 
                 .Replace("{{@jiraRoot}}", _rootUri)
                 .Replace("{{@issueKey}}", issue.Key)
                 .Replace("{{@assignee.email}}", issue.Staff.Assignee?.Email)
@@ -52,7 +52,7 @@ namespace Bender.Data.Supplying.Convert
                 .Replace("{{@creator.key}}", issue.Staff.Creator?.Key)
                 .Replace("{{@creator.name}}", issue.Staff.Creator?.Name)
                 .Replace("{{@creator.displayName}}", issue.Staff.Creator?.DisplayName)
-                .EvaluateScriptingInjections()
+                .EvaluateScriptingInjections(new ScriptingContext { issue = issue, rootUri = _rootUri })
                 ;
         }
 

@@ -28,14 +28,17 @@ namespace Bender.Extensions
                 );
         }
 
-        public static string EvaluateScriptingInjections(this string template)
+        public static string EvaluateScriptingInjections(this string template, object context)
         {
             return
-                new Regex("<<c#(?<expression>.+)#>>", RegexOptions.Singleline)
+                new Regex("<<c#(?<expression>.+?)#>>", RegexOptions.Singleline)
                 .Replace(template, m =>
                 {
-                    var script = CSharpScript.Create<object>(m.Groups["expression"].Value);
-                    return script.RunAsync().Result.ReturnValue.ToString() ?? string.Empty;
+                    return CSharpScript
+                        .EvaluateAsync<object>(m.Groups["expression"].Value, globals: context)
+                        .Result
+                        .ToString()
+                        ?? string.Empty;
                 });
         }
 

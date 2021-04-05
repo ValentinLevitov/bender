@@ -12,7 +12,7 @@ namespace Bender.Data
         public string? Status { get; set; }
         public string? Priority { get; set; }
         public string? Components { get; set; }
-        public string? Labels { get; set; }
+        public string Labels { get; set; } = Empty;
         public TimeSpan TimeSpent { get; set; }
         public string[]? BuildFound { get; set; }
         public string[]? BuildFixed { get; set; }

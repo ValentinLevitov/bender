@@ -2,10 +2,10 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS publish
 WORKDIR /src
 COPY . .
 RUN dotnet publish "./Bender/Bender.csproj" -c Release -o /app/publish \
-  --runtime alpine-x64 \
-  --self-contained true \
-  /p:PublishTrimmed=true \
-  /p:PublishSingleFile=true
+  --runtime linux-x64 \
+  --self-contained false \
+  /p:PublishTrimmed=false \
+  /p:PublishSingleFile=false
 
 # ---------------------------------
 
@@ -16,7 +16,7 @@ RUN curl -fsSLO https://github.com/aptible/supercronic/releases/download/v0.1.12
 
 # ---------------------------------
 
-FROM mcr.microsoft.com/dotnet/runtime-deps:5.0-alpine AS final
+FROM mcr.microsoft.com/dotnet/runtime:5.0 AS final
 LABEL org.opencontainers.image.source=https://github.com/ValentinLevitov/bender
 WORKDIR /app
 COPY --from=publish /app/publish/ .
