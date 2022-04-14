@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: valentinlevitovbender 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: valentinlevitovbender
+  template:
+    metadata:
+      labels:
+        app: valentinlevitovbender 
+    spec:
+      containers:
+        - name: valentinlevitovbender 
+          image: levitovcentralus.azurecr.io/valentinlevitovbender
+          ports:
+          - containerPort: 80
