@@ -1,3 +1,4 @@
+[![Docker Build](https://github.com/valentinlevitov/bender/workflows/Docker/badge.svg?event=push)](https://github.com/valentinlevitov/bender/actions?query=workflow%3A%22Docker%22) [![.NET Build](https://github.com/valentinlevitov/bender/workflows/.NET/badge.svg?event=push)](https://github.com/valentinlevitov/bender/actions?query=workflow%3A%22.NET%22)
 # Overview
 This application - called "Bender" - helps monitor basic tracking and reporting rules for your team in JIRA. For example -
 
